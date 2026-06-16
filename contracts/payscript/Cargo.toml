@@ -1,5 +1,5 @@
 [package]
-name = "payscript"
+name = "PayScript"
 version = "0.1.0"
 edition = "2021"
 description = "x402 micropayment paywall infrastructure for APIs and digital tools on Stellar"
