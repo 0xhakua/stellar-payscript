@@ -1,15 +1,50 @@
 [package]
-name = "hello-world"
-version = "0.0.0"
+name = "payscript"
+version = "0.1.0"
 edition = "2021"
-publish = false
+description = "x402 micropayment paywall infrastructure for APIs and digital tools on Stellar"
+license = "MIT"
 
+# ─────────────────────────────────────────────────────────────────────────────
+# LIB CONFIG
+# cdylib  → compiles to Wasm for Soroban deployment
+# rlib    → compiles to Rust library for use in tests and inter-contract calls
+# ─────────────────────────────────────────────────────────────────────────────
 [lib]
-crate-type = ["lib", "cdylib"]
-doctest = false
+crate-type = ["cdylib", "rlib"]
 
+# ─────────────────────────────────────────────────────────────────────────────
+# DEPENDENCIES
+# soroban-sdk is the only runtime dependency needed for on-chain contracts.
+# ─────────────────────────────────────────────────────────────────────────────
 [dependencies]
-soroban-sdk = { workspace = true }
+soroban-sdk = { version = "21.0.0" }
 
+# ─────────────────────────────────────────────────────────────────────────────
+# DEV DEPENDENCIES
+# testutils feature enables Address::generate(), mock_all_auths(), etc.
+# ─────────────────────────────────────────────────────────────────────────────
 [dev-dependencies]
-soroban-sdk = { workspace = true, features = ["testutils"] }
+soroban-sdk = { version = "21.0.0", features = ["testutils"] }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RELEASE PROFILE
+# Optimized for Wasm output — smaller binary, better performance on-chain.
+# opt-level = "z"  → optimize for size (critical for Soroban contract limits)
+# overflow-checks  → panic on integer overflow (safety)
+# ─────────────────────────────────────────────────────────────────────────────
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = false
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RELEASE-WITH-WASM PROFILE
+# Used by `soroban contract build` — inherits release settings
+# ─────────────────────────="────────────────────────────────────────────────────
+[profile.release-with-logs]
+inherits = "release"
+debug-assertions = true
