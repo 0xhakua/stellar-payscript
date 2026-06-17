@@ -1,4 +1,3 @@
-// useFreighter.ts
 import { useState, useEffect, useCallback } from 'react'
 
 export type WalletState = 'idle' | 'connecting' | 'connected' | 'error' | 'not_installed'
@@ -12,9 +11,13 @@ export function useFreighter() {
     const check = async () => {
       try {
         const f = await import('@stellar/freighter-api')
-        if (await f.isConnected()) {
-          const { address } = await f.getAddress()
-          if (address) { setPublicKey(address); setWalletState('connected') }
+        const connected = await f.isConnected()
+        if (connected) {
+          const info = await f.getUserInfo()
+          if (info && info.publicKey) {
+            setPublicKey(info.publicKey)
+            setWalletState('connected')
+          }
         }
       } catch { /* not connected */ }
     }
@@ -26,18 +29,27 @@ export function useFreighter() {
     setError(null)
     try {
       const f = await import('@stellar/freighter-api')
-      if (!await f.isConnected()) {
+
+      const connected = await f.isConnected()
+      if (!connected) {
         setWalletState('not_installed')
         setError('Freighter not found — install it at freighter.app')
         return
       }
-      const { error: reqErr } = await f.requestAccess()
-      if (reqErr) throw new Error(reqErr)
-      const { address, error: addrErr } = await f.getAddress()
-      if (addrErr || !address) throw new Error(addrErr || 'No address returned')
-      const { networkPassphrase } = await f.getNetworkDetails()
-      if (!networkPassphrase.includes('Test')) throw new Error('Switch Freighter to Testnet')
-      setPublicKey(address)
+
+      await f.requestAccess()
+
+      const info = await f.getUserInfo()
+      if (!info || !info.publicKey) {
+        throw new Error('Could not retrieve wallet address')
+      }
+
+      const networkDetails = await f.getNetworkDetails()
+      if (!networkDetails.networkPassphrase.includes('Test')) {
+        throw new Error('Switch Freighter to Testnet to use PayScript')
+      }
+
+      setPublicKey(info.publicKey)
       setWalletState('connected')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Connection failed')
@@ -46,8 +58,17 @@ export function useFreighter() {
   }, [])
 
   const disconnect = useCallback(() => {
-    setPublicKey(null); setWalletState('idle'); setError(null)
+    setPublicKey(null)
+    setWalletState('idle')
+    setError(null)
   }, [])
 
-  return { walletState, publicKey, error, connect, disconnect, isConnected: walletState === 'connected' && !!publicKey }
+  return {
+    walletState,
+    publicKey,
+    error,
+    connect,
+    disconnect,
+    isConnected: walletState === 'connected' && !!publicKey,
+  }
 }
