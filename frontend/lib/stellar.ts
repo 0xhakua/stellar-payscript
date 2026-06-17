@@ -79,13 +79,16 @@ export async function purchaseCredits(
 
     const preparedTx = StellarSdk.SorobanRpc.assembleTransaction(tx, simResult).build()
 
-    const { signedTxXdr, error: signError } = await freighter.signTransaction(
+   const signedTxXdr = await freighter.signTransaction(
       preparedTx.toXDR(),
       { network: 'TESTNET', networkPassphrase: NETWORK_PASSPHRASE }
     )
-    if (signError) throw new Error(signError)
+    if (!signedTxXdr) throw new Error('Transaction signing cancelled')
 
-    const signedTx   = StellarSdk.TransactionBuilder.fromXDR(signedTxXdr, NETWORK_PASSPHRASE)
+    const signedTx = StellarSdk.TransactionBuilder.fromXDR(
+      signedTxXdr as unknown as string,
+      NETWORK_PASSPHRASE
+    )
     const sendResult = await server.sendTransaction(signedTx)
     if (sendResult.status === 'ERROR') throw new Error('Transaction rejected by network')
 
