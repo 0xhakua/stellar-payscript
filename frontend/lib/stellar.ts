@@ -1,4 +1,3 @@
-// stellar.ts
 export const CONTRACT_ID =
   process.env.NEXT_PUBLIC_CONTRACT_ID ||
   'CA5275K7CCSSVRP546V6AI45KZJULBHE7IGRLAWMM7WGPQH22NZ2UU6C'
@@ -7,11 +6,15 @@ export const NETWORK_PASSPHRASE = 'Test SDF Network ; September 2015'
 export const SOROBAN_RPC_URL    = 'https://soroban-testnet.stellar.org'
 export const DEFAULT_API_KEY    = 'MYAPI'
 
-export const stroopsToXLM = (s: number) => (s / 10_000_000).toFixed(7).replace(/\.?0+$/, '')
+export const stroopsToXLM = (s: number) =>
+  (s / 10_000_000).toFixed(7).replace(/\.?0+$/, '')
 export const xlmToStroops = (x: number) => Math.floor(x * 10_000_000)
-export const formatAddress = (a: string) => a ? `${a.slice(0, 4)}...${a.slice(-4)}` : ''
-export const explorerContractUrl = (id: string) => `https://testnet.stellar.expert/explorer/testnet/contract/${id}`
-export const explorerTxUrl = (hash: string) => `https://testnet.stellar.expert/explorer/testnet/tx/${hash}`
+export const formatAddress = (a: string) =>
+  a ? `${a.slice(0, 4)}...${a.slice(-4)}` : ''
+export const explorerContractUrl = (id: string) =>
+  `https://testnet.stellar.expert/explorer/testnet/contract/${id}`
+export const explorerTxUrl = (hash: string) =>
+  `https://testnet.stellar.expert/explorer/testnet/tx/${hash}`
 
 export async function getCreditBalance(buyerAddress: string): Promise<number> {
   try {
@@ -19,21 +22,32 @@ export async function getCreditBalance(buyerAddress: string): Promise<number> {
     const server = new StellarSdk.SorobanRpc.Server(SOROBAN_RPC_URL)
     const contract = new StellarSdk.Contract(CONTRACT_ID)
     const account = await server.getAccount(buyerAddress)
+
     const tx = new StellarSdk.TransactionBuilder(
       new StellarSdk.Account(buyerAddress, account.sequence),
       { fee: '100', networkPassphrase: NETWORK_PASSPHRASE }
     )
-      .addOperation(contract.call('get_credits', StellarSdk.nativeToScVal(buyerAddress, { type: 'address' })))
-      .setTimeout(30).build()
+      .addOperation(
+        contract.call(
+          'get_credits',
+          StellarSdk.nativeToScVal(buyerAddress, { type: 'address' })
+        )
+      )
+      .setTimeout(30)
+      .build()
+
     const result = await server.simulateTransaction(tx)
     if (StellarSdk.SorobanRpc.Api.isSimulationError(result)) return 0
     if (!result.result?.retval) return 0
     return Number(StellarSdk.scValToNative(result.result.retval))
-  } catch { return 0 }
+  } catch {
+    return 0
+  }
 }
 
 export async function purchaseCredits(
-  buyerAddress: string, xlmAmount: number
+  buyerAddress: string,
+  xlmAmount: number
 ): Promise<{ success: boolean; txHash?: string; error?: string }> {
   try {
     const StellarSdk = await import('@stellar/stellar-sdk')
@@ -43,22 +57,32 @@ export async function purchaseCredits(
     const stroops    = BigInt(xlmToStroops(xlmAmount))
     const account    = await server.getAccount(buyerAddress)
 
-    const tx = new StellarSdk.TransactionBuilder(account, { fee: '1000', networkPassphrase: NETWORK_PASSPHRASE })
-      .addOperation(contract.call(
-        'purchase_credits',
-        StellarSdk.nativeToScVal(buyerAddress, { type: 'address' }),
-        StellarSdk.xdr.ScVal.scvSymbol(DEFAULT_API_KEY),
-        StellarSdk.nativeToScVal(stroops, { type: 'i128' })
-      ))
-      .setTimeout(60).build()
+    const tx = new StellarSdk.TransactionBuilder(account, {
+      fee: '1000',
+      networkPassphrase: NETWORK_PASSPHRASE,
+    })
+      .addOperation(
+        contract.call(
+          'purchase_credits',
+          StellarSdk.nativeToScVal(buyerAddress, { type: 'address' }),
+          StellarSdk.xdr.ScVal.scvSymbol(DEFAULT_API_KEY),
+          StellarSdk.nativeToScVal(stroops, { type: 'i128' })
+        )
+      )
+      .setTimeout(60)
+      .build()
 
     const simResult = await server.simulateTransaction(tx)
-    if (StellarSdk.SorobanRpc.Api.isSimulationError(simResult)) throw new Error(`Simulation failed: ${simResult.error}`)
+    if (StellarSdk.SorobanRpc.Api.isSimulationError(simResult)) {
+      throw new Error(`Simulation failed: ${simResult.error}`)
+    }
 
     const preparedTx = StellarSdk.SorobanRpc.assembleTransaction(tx, simResult).build()
-    const { signedTxXdr, error: signError } = await freighter.signTransaction(preparedTx.toXDR(), {
-      network: 'TESTNET', networkPassphrase: NETWORK_PASSPHRASE
-    })
+
+    const { signedTxXdr, error: signError } = await freighter.signTransaction(
+      preparedTx.toXDR(),
+      { network: 'TESTNET', networkPassphrase: NETWORK_PASSPHRASE }
+    )
     if (signError) throw new Error(signError)
 
     const signedTx   = StellarSdk.TransactionBuilder.fromXDR(signedTxXdr, NETWORK_PASSPHRASE)
@@ -76,6 +100,9 @@ export async function purchaseCredits(
     if (getResult.status === 'SUCCESS') return { success: true, txHash: sendResult.hash }
     throw new Error('Transaction did not confirm')
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : 'Transaction failed' }
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Transaction failed',
+    }
   }
 }
