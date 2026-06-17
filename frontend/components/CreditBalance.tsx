@@ -1,4 +1,4 @@
-// CreditBalance.tsx
+
 import { useState, useEffect, useCallback } from 'react'
 import { Zap, RefreshCw, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { getCreditBalance, DEFAULT_API_KEY } from '../lib/stellar'

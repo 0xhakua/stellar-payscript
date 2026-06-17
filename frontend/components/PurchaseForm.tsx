@@ -1,4 +1,4 @@
-// PurchaseForm.tsx
+
 import { useState } from 'react'
 import { Code2, Loader2, CheckCircle2, AlertCircle, ExternalLink, Zap } from 'lucide-react'
 import { purchaseCredits, xlmToStroops, DEFAULT_API_KEY, explorerTxUrl } from '../lib/stellar'

@@ -1,4 +1,4 @@
-// WalletConnect.tsx
+
 import { Wallet, Loader2, AlertCircle } from 'lucide-react'
 import { formatAddress } from '../lib/stellar'
 import type { WalletState } from '../hooks/useFreighter'
