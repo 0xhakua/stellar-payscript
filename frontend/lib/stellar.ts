@@ -24,7 +24,7 @@ export async function getCreditBalance(buyerAddress: string): Promise<number> {
     const account = await server.getAccount(buyerAddress)
 
     const tx = new StellarSdk.TransactionBuilder(
-      new StellarSdk.Account(buyerAddress, account.sequence),
+      new StellarSdk.Account(buyerAddress, account.sequenceNumber()),
       { fee: '100', networkPassphrase: NETWORK_PASSPHRASE }
     )
       .addOperation(
