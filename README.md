@@ -10,7 +10,7 @@
 
 ---
 
-## 🧩 What is PayScript?
+## 🧩 Project Description
 
 PayScript is a small but functional micropayment layer built on Stellar Soroban. It lets developers put a per-call paywall in front of any API or digital tool.
 
@@ -32,7 +32,7 @@ There's no sub-$1 payment layer that works across borders without a bank account
 
 ---
 
-## ✅ The Solution
+## 🔭 Project Vision
 
 PayScript lets a developer register their API with a price per call. Buyers connect Freighter, pay XLM, and get credits stored on the Stellar Soroban contract. Each API call deducts one credit — verified on-chain, settled in under 5 seconds, for under $0.001 in fees.
 
