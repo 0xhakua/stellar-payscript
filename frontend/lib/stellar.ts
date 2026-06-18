@@ -12,9 +12,9 @@ export const xlmToStroops = (x: number) => Math.floor(x * 10_000_000)
 export const formatAddress = (a: string) =>
   a ? `${a.slice(0, 4)}...${a.slice(-4)}` : ''
 export const explorerContractUrl = (id: string) =>
-  `https://testnet.stellar.expert/explorer/testnet/contract/${id}`
+  `https://stellar.expert/explorer/testnet/contract/${id}`
 export const explorerTxUrl = (hash: string) =>
-  `https://testnet.stellar.expert/explorer/testnet/tx/${hash}`
+  `https://stellar.expert/explorer/testnet/tx/${hash}`
 
 export async function getCreditBalance(buyerAddress: string): Promise<number> {
   try {

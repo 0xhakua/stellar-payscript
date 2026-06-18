@@ -28,7 +28,7 @@ export default function Home() {
               <span className="text-xs font-mono px-2 py-0.5 rounded border border-white/10 text-white/40">Testnet</span>
             </div>
             <a href={explorerContractUrl(CONTRACT_ID)} target="_blank" rel="noopener noreferrer" className="text-xs text-white/30 hover:text-white/60 transition-colors font-mono">
-              Contract
+              Contract ↗
             </a>
           </div>
         </nav>
