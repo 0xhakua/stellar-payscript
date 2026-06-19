@@ -1,35 +1,25 @@
-// lib/albedo.ts — minimal Albedo wallet integration
-// Albedo is web-based, no browser extension required
-// Docs: https://albedo.link/docs
+// lib/albedo.ts — Albedo wallet integration using albedo-link npm package approach
+// Albedo intent URL updated to current format
 
-const ALBEDO_INTENT_URL = 'https://albedo.link/intent'
+const ALBEDO_URL = 'https://albedo.link'
 
-interface AlbedoPublicKeyResult {
-  pubkey: string
-  signed_message?: string
-}
-
-interface AlbedoTxResult {
-  signed_envelope_xdr: string
-}
-
-// Opens Albedo popup and requests the user's public key
 export async function albedoConnect(): Promise<string> {
   return new Promise((resolve, reject) => {
-    const width = 450
+    const width = 600
     const height = 600
     const left = window.screenX + (window.outerWidth - width) / 2
     const top = window.screenY + (window.outerHeight - height) / 2
 
     const params = new URLSearchParams({
+      albedo_intent_version: '0',
       intent: 'public_key',
-      callback: window.location.origin + '/albedo-callback',
+      origin_hint: window.location.origin,
     })
 
     const popup = window.open(
-      `${ALBEDO_INTENT_URL}/public_key?${params.toString()}`,
-      'albedo-connect',
-      `width=${width},height=${height},left=${left},top=${top}`
+      `${ALBEDO_URL}/#/?${params.toString()}`,
+      'albedo',
+      `width=${width},height=${height},left=${left},top=${top},resizable,scrollbars`
     )
 
     if (!popup) {
@@ -38,7 +28,7 @@ export async function albedoConnect(): Promise<string> {
     }
 
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== 'https://albedo.link') return
+      if (!event.origin.includes('albedo.link')) return
       if (event.data?.pubkey) {
         window.removeEventListener('message', handleMessage)
         popup.close()
@@ -52,7 +42,6 @@ export async function albedoConnect(): Promise<string> {
 
     window.addEventListener('message', handleMessage)
 
-    // Timeout after 60s if user never responds
     setTimeout(() => {
       window.removeEventListener('message', handleMessage)
       if (!popup.closed) popup.close()
@@ -61,28 +50,28 @@ export async function albedoConnect(): Promise<string> {
   })
 }
 
-// Signs a transaction XDR using Albedo
 export async function albedoSignTransaction(
   xdr: string,
   networkPassphrase: string
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    const width = 450
+    const width = 600
     const height = 600
     const left = window.screenX + (window.outerWidth - width) / 2
     const top = window.screenY + (window.outerHeight - height) / 2
 
     const params = new URLSearchParams({
+      albedo_intent_version: '0',
       intent: 'tx',
       xdr,
       network: networkPassphrase.includes('Test') ? 'testnet' : 'public',
-      callback: window.location.origin + '/albedo-callback',
+      origin_hint: window.location.origin,
     })
 
     const popup = window.open(
-      `${ALBEDO_INTENT_URL}/tx?${params.toString()}`,
-      'albedo-sign',
-      `width=${width},height=${height},left=${left},top=${top}`
+      `${ALBEDO_URL}/#/?${params.toString()}`,
+      'albedo',
+      `width=${width},height=${height},left=${left},top=${top},resizable,scrollbars`
     )
 
     if (!popup) {
@@ -91,7 +80,7 @@ export async function albedoSignTransaction(
     }
 
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== 'https://albedo.link') return
+      if (!event.origin.includes('albedo.link')) return
       if (event.data?.signed_envelope_xdr) {
         window.removeEventListener('message', handleMessage)
         popup.close()
