@@ -260,3 +260,6 @@ impl PayScriptContract {
             .unwrap()
     }
 }
+
+#[cfg(test)]
+mod test;
