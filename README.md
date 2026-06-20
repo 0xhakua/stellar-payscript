@@ -40,6 +40,12 @@ PayScript lets a developer register their API with a price per call. Buyers conn
 
 ---
 
+## 🎥 Demo Video
+
+[Watch the demo](https://www.youtube.com/watch?v=TfqPF8PW00M)
+
+---
+
 ## 📸 Screenshots
 
 ### Wallet Connected
